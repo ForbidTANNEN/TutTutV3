@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>inbox</title>
+  </head>
+  <body>
+    <h1>Inbox</h1>
+    <%    foundMssgs.forEach(function(item){ %>
+      <form action="/delete" method="post">
+        <div class="item">
+          <hr>
+          <p><%=item.message%></p>
+          <hr>
+        </div>
+      </form>
+    <%  }) %>
+  </body>
+</html>
