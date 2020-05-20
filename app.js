@@ -35,8 +35,22 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   age: Number,
-  tutor: false
+  tutor: false,
+  accountCreationTime: String
 });
+
+const inboxSchema = new mongoose.Schema({
+  senderUsername: String,
+  senderUserID: String,
+  subject: String,
+  aboutYourself: String,
+  previousLearning: String,
+  whatHelp: String,
+  time: String,
+  mssgSendTime: String
+});
+
+const Inbox = mongoose.model("Inbox", inboxSchema);
 
 userSchema.plugin(passportLocalMongoose);
 
@@ -90,7 +104,7 @@ app.post("/signup", function(req, res){
     console.log(req.body.tutorCheck);
   User.findOne({username: req.body.username}, function(err, foundUsers){
       if(foundUsers === null){
-        User.register({username: req.body.username, age: req.body.age, tutor: checked}, req.body.password, function(err, user){
+        User.register({username: req.body.username, age: req.body.age, tutor: checked, accountCreationTime: Date.now()}, req.body.password, function(err, user){
           if(err){
             console.log(err);
             res.redirect("/signup");
@@ -149,15 +163,61 @@ app.get("/getTutor", function(req, res){
 });
 
 app.get("/getMath", function(req, res){
-  res.render("/getTutor", {});
+  if(req.isAuthenticated()){
+    res.render("getMath", {});
+  }else{
+    res.redirect("/login");
+  }
+});
+
+app.post("/getMath", function(req, res){
+  const message = new Inbox({
+    senderUserID: req.user._id,
+    senderUsername: req.user.username,
+    subject: "Math",
+    aboutYourself: req.body.aboutYourself,
+    previousLearning: req.body.previousLearning,
+    whatHelp: req.body.whatHelp,
+    time: req.body.time,
+    mssgSendTime: Date.now()
+  });
+  message.save();
 });
 
 app.get("/getEnglish", function(req, res){
-  res.render("/getTutor", {});
+  res.render("getEnglish", {});
+});
+
+app.post("/getEnglish", function(req, res){
+  const message = new Inbox({
+    senderUserID: req.user._id,
+    senderUsername: req.user.username,
+    subject: "English",
+    aboutYourself: req.body.aboutYourself,
+    previousLearning: req.body.previousLearning,
+    whatHelp: req.body.whatHelp,
+    time: req.body.time,
+    mssgSendTime: Date.now()
+  });
+  message.save();
 });
 
 app.get("/getETC", function(req, res){
-  res.render("/getTutor", {});
+  res.render("getEtc", {});
+});
+
+app.post("/getEtc", function(req, res){
+  const message = new Inbox({
+    senderUserID: req.user._id,
+    senderUsername: req.user.username,
+    subject: "Etc",
+    aboutYourself: req.body.aboutYourself,
+    previousLearning: req.body.previousLearning,
+    whatHelp: req.body.whatHelp,
+    time: req.body.time,
+    mssgSendTime: Date.now()
+  });
+  message.save();
 });
 
 
@@ -168,17 +228,9 @@ app.get("/getETC", function(req, res){
 // INBOX MANAGEMENT
 
 
-const inboxSchema = new mongoose.Schema({
-  senderUsername: String,
-  recieverUsername: String,
-  message: String
-});
-
-const Inbox = mongoose.model("Inbox", inboxSchema);
-
 app.get("/inbox", function(req, res){
   if(req.isAuthenticated()){
-      Inbox.find({recieverUsername: req.user.username}, function(err, foundMssgs){
+      Inbox.find({}, function(err, foundMssgs){
         res.render("inbox", {foundMssgs: foundMssgs});
       });
     }
@@ -190,7 +242,7 @@ app.get("/inbox", function(req, res){
 
 
 app.get("/sendMessage", function(req, res){
-  if(req.isAuthenticated()){
+if(req.isAuthenticated()){
   res.render("sendMessage", {});
 }else{
   res.redirect("/login");
